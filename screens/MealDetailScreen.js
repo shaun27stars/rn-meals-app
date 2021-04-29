@@ -1,13 +1,34 @@
-import React from "react";
+import React, { useEffect, useCallback } from "react";
 import { ScrollView, View, Image, StyleSheet } from "react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
-import HeaderButton from "../components/HeaderButton";
 import { Ionicons } from "@expo/vector-icons";
+import { useSelector, useDispatch } from "react-redux";
+
+import HeaderButton from "../components/HeaderButton";
 import BodyText from "../components/BodyText";
 import BulletListItem from "../components/BulletListItem";
+import { toggleFavourite } from "../store/actions/meals";
+import Colors from "../constants/colors";
 
 const MealDetailsScreen = (props) => {
   const meal = props.navigation.getParam("meal");
+  const mealIsFavourite = useSelector((state) =>
+    state.meals.favouriteMeals.some((currMeal) => currMeal === meal)
+  );
+
+  const dispatch = useDispatch();
+
+  const toggleFavouriteHandler = useCallback(() => {
+    dispatch(toggleFavourite(meal.id));
+  }, [dispatch, meal]);
+
+  useEffect(() => {
+    props.navigation.setParams({ toggleFav: toggleFavouriteHandler });
+  }, [toggleFavouriteHandler]);
+
+  useEffect(() => {
+    props.navigation.setParams({ mealIsFavourite: mealIsFavourite });
+  }, [mealIsFavourite]);
 
   const filterView = (text) => {
     return (
@@ -52,17 +73,6 @@ const MealDetailsScreen = (props) => {
             <BulletListItem key={idx}>{step}</BulletListItem>
           ))}
         </View>
-        {/* 
-    this.affordability = affordability;
-    this.complexity = complexity;
-    this.imageUrl = imageUrl;
-    this.duration = duration;
-    this.ingredients = ingredients;
-    this.steps = steps;
-    this.isGlutenFree = isGlutenFree;
-    this.isVegan = isVegan;
-    this.isVegetarian = isVegetarian;
-    this.isLactoseFree = isLactoseFree; */}
       </View>
     </ScrollView>
   );
@@ -70,17 +80,25 @@ const MealDetailsScreen = (props) => {
 
 MealDetailsScreen.navigationOptions = (navigationData) => {
   const meal = navigationData.navigation.getParam("meal");
+  const toggleFavouriteHandler = navigationData.navigation.getParam(
+    "toggleFav"
+  );
+  const mealIsFavourite = navigationData.navigation.getParam("mealIsFavourite");
+
+  const itemProps = {
+    title: "Favourite",
+    iconName: "ios-star-outline"
+  };
+  if (mealIsFavourite) {
+    itemProps.color = Colors.secondaryColor;
+    itemProps.iconName = "ios-star";
+  }
+
   return {
     headerTitle: meal.title,
     headerRight: (
       <HeaderButtons HeaderButtonComponent={HeaderButton}>
-        <Item
-          title="Favourite"
-          iconName="ios-star"
-          onPress={() => {
-            console.log("mark as favourite");
-          }}
-        />
+        <Item {...itemProps} onPress={toggleFavouriteHandler} />
       </HeaderButtons>
     )
   };

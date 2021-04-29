@@ -3,10 +3,21 @@ import React, { useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import * as Font from "expo-font";
 import AppLoading from "expo-app-loading";
-import MealsNavigator from "./navigation/MealsNavigator";
 import { enableScreens } from "react-native-screens";
+import { createStore, combineReducers } from "redux";
+import { Provider } from "react-redux";
+
+import MealsNavigator from "./navigation/MealsNavigator";
+import mealsReducer from "./store/reducers/meals";
 
 enableScreens();
+
+// Combine reducers into one master for use in the app
+// Useful for larger apps with multiple reducers
+const rootReducer = combineReducers({
+  meals: mealsReducer
+});
+const store = createStore(rootReducer);
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -31,9 +42,11 @@ export default function App() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <StatusBar style={Platform.OS === "android" ? "light" : "dark"} />
-      <MealsNavigator />
-    </View>
+    <Provider store={store}>
+      <View style={{ flex: 1 }}>
+        <StatusBar style={Platform.OS === "android" ? "light" : "dark"} />
+        <MealsNavigator />
+      </View>
+    </Provider>
   );
 }

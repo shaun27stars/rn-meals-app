@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, StyleSheet, Switch, Platform } from "react-native";
+import { useDispatch } from "react-redux";
 import Colors from "../constants/colors";
+import { setFilters } from "../store/actions/meals";
 
 const FiltersSwitch = (props) => {
   return (
@@ -23,6 +25,8 @@ const FiltersScreen = (props) => {
   const [isVegan, setIsVegan] = useState(false);
   const [isVegetarian, setIsVegetarian] = useState(false);
 
+  const dispatch = useDispatch();
+
   // Functions are re-created on component render. Using useCallback() means it'll only be
   // changed (thus triggering the useEffect() condition) if one of it's dependencies changes
   const saveFilters = useCallback(() => {
@@ -32,9 +36,8 @@ const FiltersScreen = (props) => {
       vegan: isVegan,
       vegetarian: isVegetarian
     };
-
-    console.log(appliedFilters);
-  }, [isGlutenFree, isLactoseFree, isVegan, isVegetarian]);
+    dispatch(setFilters(appliedFilters));
+  }, [isGlutenFree, isLactoseFree, isVegan, isVegetarian, dispatch]);
 
   // To pass data to the navigation we have to pass a function here
   useEffect(() => {
